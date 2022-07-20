@@ -109,13 +109,13 @@
                     <label>Quantity:</label>
                   </div>
                   <div class="cell">
-                    <input type="number" v-model="inventory.pineapples">
+                    <input type="number" v-model.number="inventory.pineapples">
                   </div>
                 </div>
               </form>
             </div>
             <div class="card-footer">
-              <button class="btn btn-light">Add to cart</button>
+              <button class="btn btn-light" @click="addToCart('pineapples')">Add to cart</button>
             </div>
           </div>
 
@@ -147,13 +147,13 @@
                     <label>Quantity:</label>
                   </div>
                   <div class="cell">
-                    <input type="number" v-model="inventory.cherries">
+                    <input type="number" v-model.number="inventory.cherries">
                   </div>
                 </div>
               </form>
             </div>
             <div class="card-footer">
-              <button class="btn btn-light">Add to cart</button>
+              <button class="btn btn-light"  @click="addToCart('cherries')">Add to cart</button>
             </div>
           </div>
 
@@ -161,7 +161,7 @@
 
       </main>
 
-      <sidebar v-if="showSidebar" :toggle="toggleSidebar" :cart="cart"/>
+      <sidebar v-if="showSidebar" :toggle="toggleSidebar" :cart="cart" :products="products"/>
       <footer>
       </footer>
 
@@ -172,7 +172,7 @@
       let app = Vue.createApp({
         data() {
           return {
-            showSidebar: false,
+            showSidebar: true,
             inventory: {
               carrots: 0,
               pineapples: 0,
@@ -182,7 +182,27 @@
               carrots: 0,
               pineapples: 0,
               cherries: 0
-            }
+            },
+            products: [
+            {
+                name: 'Carrots',
+                price: 4.82,
+                iconClass: 'carrot',
+                cartKey: 'carrots'
+              },
+              {
+                name: 'Pineapples',
+                price: 1.62,
+                iconClass: 'pineapple',
+                cartKey: 'pineapples'
+              },
+              {
+                name: 'Cherries',
+                price: 1.04,
+                iconClass: 'cherry',
+                cartKey: 'cherries'
+              },
+            ]
           }
         },
         methods: {
@@ -197,12 +217,7 @@
       });
 
       app.component('sidebar', {
-          props: ['toggle', 'cart'],
-          computed: {
-            cartTotal(){
-              return (this.cart.carrots * 4.82).toFixed(2);
-            },
-          },
+          props: ['toggle', 'cart', 'products'],
           template: `
               <aside class="cart-container">
               <div class="cart">
@@ -227,12 +242,12 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
+                      <tr v-for="product in products">
                         <td><i class="icofont-carrot icofont-3x"></i></td>
-                        <td>Carrot</td>
-                        <td>$4.82</td>
-                        <td class="center">{{ cart.carrots }}</td>
-                        <td>$ {{ cart.carrots * 4.82}}</td>
+                        <td>{{ product.name }}</td>
+                        <td>$ {{ product.price }}</td>
+                        <td class="center">{{ getCartQuantity(product.cartKey) }}</td>
+                        <td>$ {{ (getCartQuantity(product.cartKey) * product.price).toFixed(2) }}</td>
                         <td class="center">
                           <button class="btn btn-light cart-remove">
                             &times;
@@ -251,6 +266,25 @@
               </div>
             </aside>
           `,
+
+          computed: {
+            getCartQuantity: (app) => (cartKey) => {
+              if(cartKey == 'carrots'){
+                return app.cart.carrots;
+              }
+
+              if(cartKey == 'pineapples'){
+                return app.cart.pineapples;
+              }
+
+              if(cartKey == 'cherries'){
+                return app.cart.cherries;
+              }
+            },
+            cartTotal(){
+              return ((this.cart.carrots * 4.82) + (this.cart.pineapples * 1.62) + (this.cart.cherries * 1.04) ).toFixed(2);
+            },
+          },
       });
 
       app.mount('#app');
